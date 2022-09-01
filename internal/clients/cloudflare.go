@@ -31,6 +31,11 @@ import (
 )
 
 const (
+
+	keyAPIToken = "api_token"
+
+	// Cloudflare credentials environment variable names
+	envToken = "CLOUDFLARE_API_TOKEN"
 	// error messages
 	errNoProviderConfig     = "no providerConfigRef provided"
 	errGetProviderConfig    = "cannot get referenced ProviderConfig"
@@ -82,11 +87,19 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 			fmt.Sprintf("%s=%s", "HASHICUPS_USERNAME", cloudflareCreds["username"]),
 			fmt.Sprintf("%s=%s", "HASHICUPS_PASSWORD", cloudflareCreds["password"]),
 		}*/
+		ps.Env = []string{
+			fmt.Sprintf(fmtEnvVar, envToken, cloudflareCreds[keyAPIToken]),
+		}
 		// set credentials in Terraform provider configuration
 		/*ps.Configuration = map[string]interface{}{
 			"username": cloudflareCreds["username"],
 			"password": cloudflareCreds["password"],
 		}*/
+		// set credentials in Terraform provider configuration
+		ps.Configuration = map[string]interface{}{}
+		if v, ok := cloudflareCreds[keyAPIToken]; ok {
+			ps.Configuration[keyAPIToken] = v
+		}
 		return ps, nil
 	}
 }

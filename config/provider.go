@@ -23,7 +23,9 @@ import (
 	tjconfig "github.com/crossplane/terrajet/pkg/config"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/crossplane-contrib/provider-jet-cloudflare/config/null"
+
+	"github.com/crossplane-contrib/provider-jet-cloudflare/config/zone"
+	"github.com/crossplane-contrib/provider-jet-cloudflare/config/record"
 )
 
 const (
@@ -44,11 +46,16 @@ func GetProvider() *tjconfig.Provider {
 	}
 
 	pc := tjconfig.NewProviderWithSchema([]byte(providerSchema), resourcePrefix, modulePath,
-		tjconfig.WithDefaultResourceFn(defaultResourceFn))
+		tjconfig.WithDefaultResourceFn(defaultResourceFn),
+		tjconfig.WithIncludeList([]string{
+			"cloudflare_record$",
+			"cloudflare_zone$",
+		}))
 
 	for _, configure := range []func(provider *tjconfig.Provider){
 		// add custom config functions
-		null.Configure,
+		zone.Configure,
+		record.Configure,
 	} {
 		configure(pc)
 	}
